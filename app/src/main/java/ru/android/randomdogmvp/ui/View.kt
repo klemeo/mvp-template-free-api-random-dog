@@ -4,6 +4,6 @@ interface View {
 
     fun refreshDog(dog: DogPresModel)
 
-    fun showDog(animated: Boolean)
+    fun showDog(value: Boolean)
 
 }
