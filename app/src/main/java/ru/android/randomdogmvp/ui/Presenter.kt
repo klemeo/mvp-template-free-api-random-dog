@@ -1,18 +1,12 @@
 package ru.android.randomdogmvp.ui
 
-import io.reactivex.Single
-import org.koin.core.inject
-import ru.android.randomdogmvp.app.models.Dog
+import org.koin.core.component.inject
 import ru.android.randomdogmvp.app.models.Repository
 import ru.android.randomdogmvp.base.MvpPresenter
 
 class Presenter(view: View) : MvpPresenter<View>(view) {
 
     private val repository: Repository by inject()
-
-    private val dogToPresModelMapper = DogToPresModelMapper()
-
-    lateinit var getDog: Dog
 
     override fun onCreate() {
         loadDog()
@@ -21,20 +15,14 @@ class Presenter(view: View) : MvpPresenter<View>(view) {
     fun loadDog() {
         compositeDisposable.add(
             repository.getDog()
-                .flatMap { dog ->
-                    getDog = dog
-                    Single.just(dog)
-                }
                 .map {
-                    dogToPresModelMapper.map(it)
+                    it.toMap()
                 }
                 .compose(composer.single())
-                .subscribe({ dog ->
+                .doFinally { view?.showDog(true) }
+                .subscribe { dog ->
                     view?.refreshDog(dog)
-                    view?.showDog(true)
-                }, {
-                    //.
-                })
+                }
         )
     }
 
